@@ -1,0 +1,115 @@
+/* Allmän formatering */
+
+main {
+    max-width: 800px;
+    margin: auto;
+}
+
+/* Formatering av registreringsformuläret */
+
+form li {
+    list-style-type: none;
+    margin-top: 5px;
+}
+
+form ul {
+    padding-left: 0;
+}
+
+form label {
+    width: 100px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+form textarea{
+    height: 100px;
+}
+
+.inputarea{
+    width: 300px;
+}
+
+#submit-button {
+    margin-left: 100px;
+}
+
+
+/* Formatering för varje Objekt */
+
+#messages-list li {
+    list-style-type: none;
+}
+
+#messages-list {
+    padding-left: 0;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.ml {
+    margin-left: 5px;
+}
+
+.space-between {
+    justify-content: space-between;
+}
+
+.likes {
+    margin-left: 150px;
+}
+
+.profile-image {
+    height: 200px;
+    width: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#comment-list {
+    padding-left: 0;
+}
+
+#comment-list li {
+    list-style-type: none;
+    margin-top: 5px;
+}
+
+#comment-list label {
+    width: 100px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.comment-inputarea{
+    width: 300px;
+}
+
+#comment-list textarea{
+    height: 80px;
+}
+
+.submit-comment {
+    margin-left: 100px;
+    margin-top: 10px;
+}
+
+.comment-text-output{
+    margin-bottom: 10px;
+}
+
+.comment-name-output{
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
+.comment-date-output{
+    margin-left: 5px;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 12px;
+}

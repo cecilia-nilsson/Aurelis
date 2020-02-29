@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Aurelis</title>
+  <meta name="description" content="Aurelis">
+  <meta name="author" content="Cecilia Nilsson">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <a href="file:///D:/Cecilia/Programmering/GIT/aurelis/about.html">Läs mer om mig här</a>
+    <main>
+        <article>
+            <h1>Aurelis</h1>
+            <p>Här kan du kontakta folk. Och prata med dem.</p>
+            <form id="message-form">
+                <ul>
+                    <li>
+                        <label>Titel:</label>
+                        <input type="text" name="title" class="inputarea">
+                    </li>
+                    <li>
+                        <label>Namn:</label>
+                        <input type="text" name="name" class="inputarea" maxlength="30">
+                    </li>
+                    <li class="email-field">
+                        <label>E-postadress:</label>
+                        <input type="email" name="email" class="inputarea">
+                    </li>
+                    <li>
+                        <label>Bild:</label>
+                        <input type=text name="image" class="inputarea"></input>
+                    </li>
+                    <li>
+                        <label>Meddelande:</label>
+                        <textarea name="text" class="inputarea"></textarea>
+                    </li>
+                </ul>
+                <button id="submit-button">Skicka</button>
+            </form>
+            <h2>Skicka in ett meddelande</h2>
+            <p>Fyll i formuläret eller maila mig på <a href="mailto:cecilia.nilsson@gmail.com">min mailadress</a> så lägger jag upp dig här!</p>
+
+            <h2>Senaste meddelandena</h2>
+
+            <ul id="messages-list">
+            </ul>
+        </article>
+    </main>
+    <script src="js/server.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/moment.js"></script>
+</body>
+</html>
