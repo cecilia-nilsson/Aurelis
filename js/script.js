@@ -14,15 +14,25 @@ const templateFn = message => `
                 ${message['title']}
             </h3>
             <p class="row">${message['text']}</p>
-            <p>
         </div>
         <img src="${message['image']}" class="profile-image">
     </div>
+    <p>${getTimeCheckboxLabels(message)}</p>
+    <p>${getAgeCheckboxLabels(message)}</p>
+    <p>
         Skriv en kommentar nedan eller skicka ett mail till <a href="${message['email']}"">
         ${message['name']}</a>.
     </p>
     <button class="like" data-id="${message.id}">Gilla</button>
     <div>
+        <p>${message['comment'].map(comment =>`
+            <p class="comment-text-output">${comment.text}</p>
+            <div class="row">
+                <p class="comment-name-output">${comment.name}</p>
+                <span class="comment-date-output">-</span>
+                <p class="comment-date-output">${comment.date}</p>
+            </div>
+        `)}</p>
         <h2>Skriv en kommentar</h2>
         <ul id="comment-list">
             <li>
@@ -35,14 +45,6 @@ const templateFn = message => `
             </li>
         </ul>
         <button class="submit-comment" data-id="${message.id}">Skicka kommentar</button>
-        <p>${message['comment'].map(comment =>`
-            <p class="comment-text-output">${comment.text}</p>
-            <div class="row">
-                <p class="comment-name-output">${comment.name}</p>
-                <span class="comment-date-output">-</span>
-                <p class="comment-date-output">${comment.date}</p>
-            </div>
-        `)}</p>
     </div>
 </li>`
 
@@ -64,7 +66,7 @@ const render = () => {
         button.onclick = (e) => {
             message = server.getMessage(button.dataset.id)
             //console.error(message.comment)
-            //console.log(document.querySelector('[name="comment.text"]').value)
+            //console.log(message.comment)
             message.comment.push({
                 name: document.querySelector('[name="comment.name"]').value,
                 text: document.querySelector('[name="comment.text"]').value,
@@ -79,11 +81,61 @@ const render = () => {
     }
 }
 
+function getTimeCheckboxLabels(message) {
+    let html = ''
+
+    let checkboxes = {
+        'vardag_fm': 'Vardagar förmiddag',
+        'vardag_em': 'Vardagar eftermiddag',
+        'vardag_kvall': 'Vardagar kväll',
+        'helg': 'Helger',
+    }
+
+    for (let value in checkboxes) {
+        if (message[value] !== 'on') continue
+        
+        html += `<li>${checkboxes[value]}</li>`
+    }
+
+    if (html) {
+        html = '<h4>Hjälp önskas främst följande tider:</h4>' + '<ul>' + html + '</ul>'
+    }
+
+    return html
+}
+
+function getAgeCheckboxLabels(message) {
+    let html = ''
+
+    let checkboxes = {
+        '0-6': '0-6 år',
+        '7-12': '7-12 år',
+        '13-18': '13-18 år',
+    }
+
+    for (let value in checkboxes) {
+        if (message[value] !== 'on') continue
+        
+        html += `<li>${checkboxes[value]}</li>`
+    }
+
+    if (html) {
+        html = '<h4>Ålder på barnet/barnen:</h4>' + '<ul>' + html + '</ul>'
+    }
+
+    return html
+}
+
 const submitMessage = e => {
     e.preventDefault()
 
+    if (document.getElementById('title').value == '') { alert('missing title'); return }
+    if (document.getElementById('name').value == '') { alert('missing name'); return }
+    if (document.getElementById('email').value == '') { alert('missing email'); return }
+    
     const FD = new FormData(document.getElementById('message-form'))
     const message = Object.fromEntries(FD)
+    console.log(message)
     message['date'] = moment().format('YYYY-MM-DD  HH:mm')
     message['likes'] = 0
     message['comment'] = []

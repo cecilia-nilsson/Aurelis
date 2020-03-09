@@ -11,7 +11,9 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <a href="file:///D:/Cecilia/Programmering/GIT/aurelis/about.html">Läs mer om mig här</a>
+    <!-- <a href="file:///D:/Cecilia/Programmering/GIT/aurelis/registration.html">Skapa din profil</a>
+    <a href="file:///D:/Cecilia/Programmering/GIT/aurelis/about.html">Läs mer om mig</a>
+    <a href="file:///D:/Cecilia/Programmering/GIT/aurelis/profiles.html">Se alla profiler</a> -->
     <main>
         <article>
             <h1>Aurelis</h1>
@@ -20,15 +22,15 @@
                 <ul>
                     <li>
                         <label>Titel:</label>
-                        <input type="text" name="title" class="inputarea">
+                        <input type="text" id="title" name="title" class="inputarea"  maxlength="40" required>
                     </li>
                     <li>
                         <label>Namn:</label>
-                        <input type="text" name="name" class="inputarea" maxlength="30">
+                        <input type="text" id="name" name="name" class="inputarea" maxlength="40" required>
                     </li>
                     <li class="email-field">
                         <label>E-postadress:</label>
-                        <input type="email" name="email" class="inputarea">
+                        <input type="email" id="email" name="email" class="inputarea" required>
                     </li>
                     <li>
                         <label>Bild:</label>
@@ -39,10 +41,44 @@
                         <textarea name="text" class="inputarea"></textarea>
                     </li>
                 </ul>
+                <p>Hjälp behövs främst:</p>
+                <ul class = "checkboxes">
+                    <li>
+                        <input type="checkbox" name="vardag_fm">
+                        <label>Vardagar förmiddag</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="vardag_em">
+                        <label>Vardagar eftermiddag</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="vardag_kvall">
+                        <label>Vardagar kväll</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="helg">
+                        <label>Helger</label>
+                    </li>
+                </ul>
+                <p>Ålder på barnet/barnen:</p>
+                <ul class = "checkboxes">
+                    <li>
+                        <input type="checkbox" name="0-6">
+                        <label>0-6 år</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="7-12">
+                        <label>7-12 år</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="13-18">
+                        <label>13-18 år</label>
+                    </li>
+               </ul>
                 <button id="submit-button">Skicka</button>
             </form>
             <h2>Skicka in ett meddelande</h2>
-            <p>Fyll i formuläret eller maila mig på <a href="mailto:cecilia.nilsson@gmail.com">min mailadress</a> så lägger jag upp dig här!</p>
+            <p>Fyll i formuläret eller <a href="mailto:cecilia.nilsson@gmail.com">maila mig</a> så lägger jag upp dig här!</p>
 
             <h2>Senaste meddelandena</h2>
 
