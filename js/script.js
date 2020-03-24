@@ -7,13 +7,13 @@ const templateFn = message => `
                     ${message['name']}
                 </p>
                 <span class="ml">-</span>
-                <p class="ml">${message['date']}</p>
+                <p class="ml">${moment(message['date']).format('YYYY-MM-DD  HH:mm')}</p>
                 <p class="likes">Gillningar: ${message['likes']}</p>
             </div>
             <h3>
                 ${message['title']}
             </h3>
-            <p class="row">${message['text']}</p>
+            <p class="row">${message['message']}</p>
         </div>
         <img src="${message['image']}" class="profile-image">
     </div>
@@ -26,18 +26,18 @@ const templateFn = message => `
     <button class="like" data-id="${message.id}">Gilla</button>
     <div>
         <p>${message['comment'].map(comment =>`
-            <p class="comment-text-output">${comment.text}</p>
+            <p class="comment-text-output">${comment.message}</p>
             <div class="row">
                 <p class="comment-name-output">${comment.name}</p>
                 <span class="comment-date-output">-</span>
-                <p class="comment-date-output">${comment.date}</p>
+                <p class="comment-date-output">${moment(comment.date).format('YYYY-MM-DD  HH:mm')}</p>
             </div>
         `)}</p>
         <h2>Skriv en kommentar</h2>
         <ul id="comment-list">
             <li>
                 <label>Kommentar:</label>
-                <textarea name="comment.text" class="comment-inputarea"></textarea>
+                <textarea name="comment.message" class="comment-inputarea"></textarea>
             </li>
             <li>
                 <label>Namn:</label>
@@ -48,8 +48,8 @@ const templateFn = message => `
     </div>
 </li>`
 
-const render = () => {
-    const mappedMessages = server.listMessages().map(templateFn)
+const render = messages => {
+    const mappedMessages = messages.map(templateFn)
     const html = mappedMessages.join('')
     document.getElementById("messages-list").innerHTML = html
 
@@ -69,7 +69,7 @@ const render = () => {
             //console.log(message.comment)
             message.comment.push({
                 name: document.querySelector('[name="comment.name"]').value,
-                text: document.querySelector('[name="comment.text"]').value,
+                text: document.querySelector('[name="comment.message"]').value,
                 // date: new Date(),
                 date: moment().format('YYYY-MM-DD  HH:mm'),
             })
@@ -136,15 +136,10 @@ const submitMessage = e => {
     const FD = new FormData(document.getElementById('message-form'))
     const message = Object.fromEntries(FD)
     console.log(message)
-    message['date'] = moment().format('YYYY-MM-DD  HH:mm')
-    message['likes'] = 0
-    message['comment'] = []
-    server.addMessage(message)
-
-    render()
+    server.addMessage(message).then(() => server.listMessages().then(render))
 }
 
-render()
+server.listMessages().then(render)
 
 document.getElementById('submit-button').onclick = submitMessage
 
