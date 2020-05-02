@@ -55,10 +55,9 @@ const render = messages => {
 
     for(let button of document.querySelectorAll('.message .like')) {
         button.onclick = () => {
-            message = server.getMessage(button.dataset.id)
-            message.likes++
-            server.updateMessage(button.dataset.id, message)
-            render()
+            server.likePost(button.dataset.id).then(() => {
+                server.listMessages().then(render)
+            })
         }
     }
 
