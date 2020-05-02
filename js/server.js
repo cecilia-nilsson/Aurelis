@@ -4,10 +4,6 @@ class Server {
         .then(response => response.json())
     }
 
-    getMessage(id) {
-        return this.listMessages()[id]
-    }
-
     addMessage(message) {
         return fetch('http://localhost:8080/posts',{
             method: 'POST',
@@ -19,10 +15,14 @@ class Server {
         .then(response => response.json())
     }
 
-    updateMessage(id, message) {
-        const messages = this.listMessages()
-        messages[id] = message
-        localStorage['messages'] = JSON.stringify(messages)
+    likePost(postId) {
+        return fetch(`http://localhost:8080/posts/${postId}/like`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
     }
 }
 
