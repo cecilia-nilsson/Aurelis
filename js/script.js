@@ -41,7 +41,7 @@ const templateFn = message => `
             </li>
             <li>
                 <label>Namn:</label>
-                <input type="text" name="comment.name" class="comment-inputarea">
+                <input type="text" name="comment.name" class="comment-inputarea" maxlength="40">
             </li>
         </ul>
         <button class="submit-comment" data-id="${message.id}">Skicka kommentar</button>
