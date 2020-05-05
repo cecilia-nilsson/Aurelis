@@ -1,0 +1,1 @@
+Copy sample-config.json file into config.json containing your database credentials.

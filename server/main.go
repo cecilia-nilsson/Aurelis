@@ -6,14 +6,24 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
+
+type config struct {
+	DbUser string `json:"db_user"`
+	DbPass string `json:"db_pass"`
+	DbName string `json:"db_name"`
+	DbHost string `json:"db_host"`
+	DbPort string `json:"db_port"`
+}
 
 type comment struct {
 	Name    string    `json:"name"`
@@ -23,7 +33,7 @@ type comment struct {
 
 type post struct {
 	ID          int       `json:"id"`
-	Created        time.Time `json:"created"`
+	Created     time.Time `json:"created"`
 	Likes       int       `json:"likes"`
 	Title       string    `json:"title"`
 	Name        string    `json:"name"`
@@ -42,16 +52,16 @@ type post struct {
 
 var db *sql.DB
 
-func homeLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome home!")
-}
+// func homeLink(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Fprintf(w, "Welcome home!")
+// }
 
 func listPosts(w http.ResponseWriter, r *http.Request) {
 	posts := []post{}
 
 	rows, err := db.Query(`
 	SELECT
-		id, title, name, email, image, message, created, vardagfm, vardagem, vardagkvall, helg, age06, age712, age1318, likes
+		id, title, name, email, image, message, created, likes, vardagfm, vardagem, vardagkvall, helg, age06, age712, age1318
 	FROM
 		posts
 	ORDER BY
@@ -75,6 +85,7 @@ func listPosts(w http.ResponseWriter, r *http.Request) {
 			&p.Image,
 			&p.Message,
 			&p.Created,
+			&p.Likes,
 			&p.VardagFM,
 			&p.VardagEM,
 			&p.VardagKvall,
@@ -82,7 +93,6 @@ func listPosts(w http.ResponseWriter, r *http.Request) {
 			&p.Age06,
 			&p.Age712,
 			&p.Age1318,
-			&p.Likes,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -103,18 +113,23 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(reqBody, &newPost)
 	newPost.Created = time.Now()
+	newPost.Likes = 0
 	newPost.Comments = []comment{}
 
+	// fmt.Println(newPost.Name)
+	// fmt.Println(newPost.VardagFM)
+	// fmt.Println(newPost.VardagEM)
 	_, err = db.Exec(`
 	INSERT INTO 
-		posts(title, name, email, image, message, created, vardagfm, vardagem, vardagkvall, helg, age06, age712, age1318)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+		posts(title, name, email, image, message, created, likes, vardagfm, vardagem, vardagkvall, helg, age06, age712, age1318)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
 		newPost.Title,
 		newPost.Name,
 		newPost.Email,
 		newPost.Image,
 		newPost.Message,
 		newPost.Created,
+		newPost.Likes,
 		newPost.VardagFM,
 		newPost.VardagEM,
 		newPost.VardagKvall,
@@ -130,6 +145,38 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newPost)
+}
+
+func createComment(w http.ResponseWriter, r *http.Request) {
+	var newComment comment
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data")
+		return
+	}
+
+	json.Unmarshal(reqBody, &newComment)
+	newComment.Date = time.Now()
+
+	_, err = db.Exec(`
+	INSERT INTO 
+		comments(name, message, created, post_id)
+	VALUES($1, $2, $3, $4)`,
+		newComment.Name,
+		newComment.Message,
+		newComment.Date,
+		id,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newComment)
 }
 
 func likePost(w http.ResponseWriter, r *http.Request) {
@@ -150,12 +197,29 @@ func likePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The following code row is just to give a response to the browser, to avoid complaint.
 	json.NewEncoder(w).Encode(map[string]int{"foo": 1, "bar": 2})
 }
 
 func main() {
+	// Open config file
+	configFile, errConfigFile := os.Open("config.json")
+	if errConfigFile != nil {
+		fmt.Println(errConfigFile)
+	}
+	defer configFile.Close()
+
+	// Read and implement config file
+	decoder := json.NewDecoder(configFile)
+	configuration := config{}
+	errDecode := decoder.Decode(&configuration)
+	if errDecode != nil {
+		fmt.Println("error:", errDecode)
+	}
+
+	// Open the database
 	var err error
-	db, err = sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=aurelis sslmode=disable")
+	db, err = sql.Open("postgres", "host="+configuration.DbHost+" port="+configuration.DbPort+" user="+configuration.DbUser+" password="+configuration.DbPass+" dbname="+configuration.DbName+" sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,11 +230,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", homeLink)
+	// router.HandleFunc("/", homeLink)
 	router.HandleFunc("/posts", listPosts).Methods("GET")
 	router.HandleFunc("/posts", createPost).Methods("POST")
+	router.HandleFunc("/comments", createComment).Methods("POST")
 	router.HandleFunc("/posts/{id:[0-9]+}/like", likePost).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedMethods([]string{"POST", "GET"}),
