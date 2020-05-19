@@ -19,13 +19,13 @@ class Server {
         return this.listMessages()[id]
     }
 
-    addComment(message) {
+    addComment(id, name, message) {
         return fetch('http://localhost:8080/comments',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(message),
+            body: JSON.stringify({post_id:parseInt(id),name:name,message:message}),
         })
         .then(response => response.json())
     }

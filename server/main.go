@@ -26,6 +26,8 @@ type config struct {
 }
 
 type comment struct {
+	PostID  int       `json:"post_id"`
+	ID      int       `json:"id"`
 	Name    string    `json:"name"`
 	Date    time.Time `json:"date"`
 	Message string    `json:"message"`
@@ -76,7 +78,6 @@ func listPosts(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var p post
 		// Read all comments
-		p.Comments = []comment{}
 		err := rows.Scan(
 			&p.ID,
 			&p.Title,
@@ -97,10 +98,49 @@ func listPosts(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		p.Comments = listComments(p.ID)
 		posts = append(posts, p)
 	}
 
 	json.NewEncoder(w).Encode(posts)
+}
+
+func listComments(PostID int) []comment {
+	comments := []comment{}
+
+	rows, err := db.Query(`
+	SELECT
+		id, name, message, created
+	FROM
+		comments
+	WHERE
+		post_id = $1
+	ORDER BY
+		created DESC`,
+		PostID)
+	if err != nil {
+		fmt.Println(err)
+		return comments
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var c comment
+		// Read all comments
+		err := rows.Scan(
+			&c.ID,
+			&c.Name,
+			&c.Message,
+			&c.Date,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		comments = append(comments, c)
+	}
+
+	return comments
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
@@ -149,8 +189,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 func createComment(w http.ResponseWriter, r *http.Request) {
 	var newComment comment
-	vars := mux.Vars(r)
-	id := vars["id"]
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -168,10 +206,10 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		newComment.Name,
 		newComment.Message,
 		newComment.Date,
-		id,
+		newComment.PostID,
 	)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, newComment)
 		return
 	}
 

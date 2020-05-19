@@ -63,24 +63,9 @@ const render = messages => {
 
     for(let button of document.querySelectorAll('.message .submit-comment')) {
         button.onclick = (e) => {
-            message = server.getMessage(button.dataset.id)
-            console.log(message)
-
-            // server.addComment(message)
-
-            // message = server.getMessage(button.dataset.id)
-            // //console.error(message.comment)
-            // //console.log(message.comment)
-            // message.comment.push({
-            //     name: document.querySelector('[name="comment.name"]').value,
-            //     text: document.querySelector('[name="comment.message"]').value,
-            //     // date: new Date(),
-            //     date: moment().format('YYYY-MM-DD  HH:mm'),
-            // })
-            // console.error(message.comment)
-            // server.updateMessage(button.dataset.id, message)
-
-            render()
+            name = button.previousElementSibling.querySelector('[name="comment.name"]').value
+            message = button.previousElementSibling.querySelector('[name="comment.message"]').value
+            server.addComment(button.dataset.id,name,message).then(() => server.listMessages().then(render))
         }
     }
 }
@@ -139,6 +124,8 @@ const submitMessage = e => {
     
     const FD = new FormData(document.getElementById('message-form'))
     const message = Object.fromEntries(FD)
+
+    message.vardag_em = message.vardag_em == 'on'
     console.log(message)
     server.addMessage(message).then(() => server.listMessages().then(render))
 }
