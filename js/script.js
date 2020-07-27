@@ -15,12 +15,12 @@ const templateFn = message => `
             </h3>
             <p class="row">${message['message']}</p>
         </div>
-        <img src="${message['image']}" class="profile-image">
+        <img src="${message['image']}" class="profile-image"/>
     </div>
     <p>${getTimeCheckboxLabels(message)}</p>
     <p>${getAgeCheckboxLabels(message)}</p>
     <p>
-        Skriv en kommentar nedan eller skicka ett mail till <a href="${message['email']}"">
+        Skriv en kommentar nedan eller skicka ett mail till <a href="mailto:${message['email']}"">
         ${message['name']}</a>.
     </p>
     <button class="like" data-id="${message.id}">Gilla</button>
@@ -49,6 +49,8 @@ const templateFn = message => `
 </li>`
 
 const render = messages => {
+    // messages.forEach(message => { console.log(message.image) })
+
     const mappedMessages = messages.map(templateFn)
     const html = mappedMessages.join('')
     document.getElementById("messages-list").innerHTML = html
@@ -81,13 +83,13 @@ function getTimeCheckboxLabels(message) {
     }
 
     for (let value in checkboxes) {
-        if (message[value] !== 'on') continue
+        if (!message[value]) continue
         
         html += `<li>${checkboxes[value]}</li>`
     }
 
     if (html) {
-        html = '<h4>Hjälp önskas främst följande tider:</h4>' + '<ul>' + html + '</ul>'
+        html = '<h4 class="checkboxheader">Hjälp önskas främst följande tider:</h4>' + '<ul class="checkbox-list">' + html + '</ul>'
     }
 
     return html
@@ -97,19 +99,18 @@ function getAgeCheckboxLabels(message) {
     let html = ''
 
     let checkboxes = {
-        '0-6': '0-6 år',
-        '7-12': '7-12 år',
-        '13-18': '13-18 år',
+        'age_0_6': '0-6 år',
+        'age_7_12': '7-12 år',
+        'age_13_18': '13-18 år',
     }
 
     for (let value in checkboxes) {
-        if (message[value] !== 'on') continue
+        if (!message[value]) continue
         
         html += `<li>${checkboxes[value]}</li>`
     }
-
     if (html) {
-        html = '<h4>Ålder på barnet/barnen:</h4>' + '<ul>' + html + '</ul>'
+        html = '<h4 class="checkboxheader">Ålder på barnet/barnen:</h4>' + '<ul class="checkbox-list">' + html + '</ul>'
     }
 
     return html
@@ -125,8 +126,15 @@ const submitMessage = e => {
     const FD = new FormData(document.getElementById('message-form'))
     const message = Object.fromEntries(FD)
 
+    // For checkboxes, value 'on' is set to 'true', and 'off' is set to 'false', to be readable for Backend.
+    message.vardag_fm = message.vardag_fm == 'on'
     message.vardag_em = message.vardag_em == 'on'
-    console.log(message)
+    message.vardag_kvall = message.vardag_kvall == 'on'
+    message.helg = message.helg == 'on'
+    message.age_0_6 = message.age_0_6 == 'on'
+    message.age_7_12 = message.age_7_12 == 'on'
+    message.age_13_18 = message.age_13_18 == 'on'
+    // console.log(message)
     server.addMessage(message).then(() => server.listMessages().then(render))
 }
 

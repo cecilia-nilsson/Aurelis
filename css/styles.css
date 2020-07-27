@@ -44,11 +44,8 @@ form textarea{
 
 /* Formatering för varje Objekt */
 
-#messages-list li {
-    list-style-type: none;
-}
-
 #messages-list {
+    list-style-type: none;
     padding-left: 0;
 }
 
@@ -78,6 +75,15 @@ form textarea{
     width: 200px;
     object-fit: cover;
     border-radius: 50%;
+}
+
+.checkboxheader {
+    margin-bottom: 5px;
+}
+
+.checkbox-list{
+    list-style-type: disc;
+    padding-left: 80px;  
 }
 
 #comment-list {

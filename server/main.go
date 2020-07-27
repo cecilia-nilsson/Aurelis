@@ -46,9 +46,9 @@ type post struct {
 	VardagEM    bool      `json:"vardag_em"`
 	VardagKvall bool      `json:"vardag_kvall"`
 	Helg        bool      `json:"helg"`
-	Age06       bool      `json:"0-6"`
-	Age712      bool      `json:"7-12"`
-	Age1318     bool      `json:"13-18"`
+	Age06       bool      `json:"age_0_6"`
+	Age712      bool      `json:"age_7_12"`
+	Age1318     bool      `json:"age_13_18"`
 	Comments    []comment `json:"comment"`
 }
 
