@@ -53,7 +53,9 @@ const render = messages => {
 
     const mappedMessages = messages.map(templateFn)
     const html = mappedMessages.join('')
-    document.getElementById("messages-list").innerHTML = html
+    if (document.getElementById("messages-list")) {
+        document.getElementById("messages-list").innerHTML = html
+    }
 
     for(let button of document.querySelectorAll('.message .like')) {
         button.onclick = () => {
@@ -140,5 +142,7 @@ const submitMessage = e => {
 
 server.listMessages().then(render)
 
-document.getElementById('submit-button').onclick = submitMessage
+if (document.getElementById('submit-button')) {
+    document.getElementById('submit-button').onclick = submitMessage
+}
 
