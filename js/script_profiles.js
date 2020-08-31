@@ -32,7 +32,7 @@ const templateFn = message => `
                 <span class="comment-date-output">-</span>
                 <p class="comment-date-output">${moment(comment.date).format('YYYY-MM-DD  HH:mm')}</p>
             </div>
-        `)}</p>
+        `).join('')}</p>
         <h2>Skriv en kommentar</h2>
         <ul id="comment-list">
             <li>
