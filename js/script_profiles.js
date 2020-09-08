@@ -118,4 +118,30 @@ function getAgeCheckboxLabels(message) {
     return html
 }
 
-server.listMessages().then(render)
+const searchMessages = e => {
+    e.preventDefault()
+    
+    const FD = new FormData(document.getElementById('search-form'))
+    const params = Object.fromEntries(FD)
+
+    // For checkboxes, value 'on' is set to 'true', and 'off' is set to 'false', to be readable for Backend.
+    params.vardag_fm = params.vardag_fm == 'on'
+    params.vardag_em = params.vardag_em == 'on'
+    params.vardag_kvall = params.vardag_kvall == 'on'
+    params.helg = params.helg == 'on'
+    params.age_0_6 = params.age_0_6 == 'on'
+    params.age_7_12 = params.age_7_12 == 'on'
+    params.age_13_18 = params.age_13_18 == 'on'
+    console.log(params)
+    // server.searchMessages(params).then(messages => {
+    //     console.log(messages)
+    //     render(messages)
+    // })
+    server.searchMessages(params).then(render)
+}
+
+// server.listMessages().then(render)
+
+if (document.getElementById('search-button')) {
+    document.getElementById('search-button').onclick = searchMessages
+}

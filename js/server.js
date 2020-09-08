@@ -15,6 +15,18 @@ class Server {
         .then(response => response.json())
     }
 
+    searchMessages(params) {
+        return fetch('http://localhost:8080/searchPosts',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params),
+        })
+        .then(response => response.json())
+        .catch(err => {console.log(err)})
+    }
+
     getMessage(id) {
         return this.listMessages()[id]
     }

@@ -52,11 +52,18 @@ type post struct {
 	Comments    []comment `json:"comment"`
 }
 
-var db *sql.DB
+type search struct {
+	FreeText    string `json:"free_text"`
+	VardagFM    bool   `json:"vardag_fm"`
+	VardagEM    bool   `json:"vardag_em"`
+	VardagKvall bool   `json:"vardag_kvall"`
+	Helg        bool   `json:"helg"`
+	Age06       bool   `json:"age_0_6"`
+	Age712      bool   `json:"age_7_12"`
+	Age1318     bool   `json:"age_13_18"`
+}
 
-// func homeLink(w http.ResponseWriter, r *http.Request) {
-// 	fmt.Fprintf(w, "Welcome home!")
-// }
+var db *sql.DB
 
 func listPosts(w http.ResponseWriter, r *http.Request) {
 	posts := []post{}
@@ -239,6 +246,157 @@ func likePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]int{"foo": 1, "bar": 2})
 }
 
+func makeSQLQuery(searchPost search) string {
+	var sqlQuery string
+	fmt.Println("Start: ", sqlQuery)
+
+	if searchPost.FreeText != "" {
+		sqlQuery = sqlQuery + `(
+			title ILIKE '%' || $1 || '%'
+		OR
+			name ILIKE '%' || $1 || '%'
+		OR
+			email ILIKE '%' || $1 || '%'
+		OR
+			message ILIKE '%' || $1 || '%'
+		)`
+	}
+
+	fmt.Println("Efter fritext: ", sqlQuery)
+
+	if searchPost.VardagFM || searchPost.VardagEM || searchPost.VardagKvall || searchPost.Helg {
+		var sqlTimeQuery string
+
+		if searchPost.VardagFM {
+			sqlTimeQuery = `vardagfm = true `
+		}
+		if searchPost.VardagEM {
+			if sqlTimeQuery != "" {
+				sqlTimeQuery = sqlTimeQuery + `OR vardagem = true `
+			} else {
+				sqlTimeQuery = `vardagem = true `
+			}
+		}
+		if searchPost.VardagKvall {
+			if sqlTimeQuery != "" {
+				sqlTimeQuery = sqlTimeQuery + `OR vardagkvall = true `
+			} else {
+				sqlTimeQuery = `vardagkvall = true `
+			}
+		}
+		if searchPost.Helg {
+			if sqlTimeQuery != "" {
+				sqlTimeQuery = sqlTimeQuery + `OR helg = true `
+			} else {
+				sqlTimeQuery = `helg = true `
+			}
+		}
+
+		if sqlQuery != "" && sqlTimeQuery != "" {
+			sqlQuery = sqlQuery + ` AND (` + sqlTimeQuery + `)`
+		} else if sqlQuery == "" && sqlTimeQuery != "" {
+			sqlQuery = `(` + sqlTimeQuery + `)`
+		}
+	}
+
+	fmt.Println("Efter tider: ", sqlQuery)
+
+	if searchPost.Age06 || searchPost.Age712 || searchPost.Age1318 {
+		var sqlAgeQuery string
+
+		if searchPost.Age06 {
+			sqlAgeQuery = `age06 = true `
+		}
+		if searchPost.Age712 {
+			if sqlAgeQuery != "" {
+				sqlAgeQuery = sqlAgeQuery + `OR age712 = true `
+			} else {
+				sqlAgeQuery = `age712 = true `
+			}
+		}
+		if searchPost.Age1318 {
+			if sqlAgeQuery != "" {
+				sqlAgeQuery = sqlAgeQuery + `OR age1318 = true `
+			} else {
+				sqlAgeQuery = `age1318 = true `
+			}
+		}
+
+		if sqlQuery != "" && sqlAgeQuery != "" {
+			sqlQuery = sqlQuery + ` AND (` + sqlAgeQuery + `)`
+		} else if sqlQuery == "" && sqlAgeQuery != "" {
+			sqlQuery = `(` + sqlAgeQuery + `)`
+		}
+	}
+
+	fmt.Println("Efter ålder: ", sqlQuery)
+
+	if sqlQuery != "" {
+		sqlQuery = `SELECT * FROM posts WHERE ` + sqlQuery
+	}
+
+	fmt.Println("Returnerad sträng: ", sqlQuery)
+
+	return sqlQuery
+}
+
+func searchPosts(w http.ResponseWriter, r *http.Request) {
+	var searchPost search
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
+		return
+	}
+
+	json.Unmarshal(reqBody, &searchPost)
+
+	sqlQuery := makeSQLQuery(searchPost)
+	fmt.Println("Mottagen sträng till searchPosts-funktionen: ", sqlQuery)
+
+	rows, err := db.Query(
+		sqlQuery,
+		searchPost.FreeText,
+	)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	posts := []post{}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var p post
+		// Read all comments
+		err := rows.Scan(
+			&p.ID,
+			&p.Title,
+			&p.Name,
+			&p.Email,
+			&p.Image,
+			&p.Message,
+			&p.Created,
+			&p.Likes,
+			&p.VardagFM,
+			&p.VardagEM,
+			&p.VardagKvall,
+			&p.Helg,
+			&p.Age06,
+			&p.Age712,
+			&p.Age1318,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		p.Comments = listComments(p.ID)
+		posts = append(posts, p)
+	}
+
+	json.NewEncoder(w).Encode(posts)
+}
+
 func main() {
 	// Open config file
 	configFile, errConfigFile := os.Open("config.json")
@@ -274,6 +432,8 @@ func main() {
 	router.HandleFunc("/posts", createPost).Methods("POST")
 	router.HandleFunc("/comments", createComment).Methods("POST")
 	router.HandleFunc("/posts/{id:[0-9]+}/like", likePost).Methods("POST")
+	router.HandleFunc("/searchPosts", searchPosts).Methods("POST")
+
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedMethods([]string{"POST", "GET"}),
 		handlers.AllowedOrigins([]string{"*"}),

@@ -13,7 +13,57 @@
 <body>
     <a href="index.html">Startsida</a>
     <a href="registration.html">Skapa din profil</a>
+    <!-- <a href="search.html">Sök bland profilerna</a> -->
     <main>
+        <article>
+            <h1>Sök bland profilerna</h1>
+            <p>Fyll i formuläret för att söka bland profilerna.
+                Fyller du inte i något fällt får du upp alla existerande profiler.</p>
+            <form id="search-form">
+                <ul>
+                    <li>
+                        <label>Fri text:</label>
+                        <input type="text" id="free_text" name="free_text" class="inputarea">
+                    </li>
+                </ul>
+                <p>Hjälp behövs främst:</p>
+                <ul class = "checkboxes">
+                    <li>
+                        <input type="checkbox" name="vardag_fm">
+                        <label>Vardagar förmiddag</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="vardag_em">
+                        <label>Vardagar eftermiddag</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="vardag_kvall">
+                        <label>Vardagar kväll</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="helg">
+                        <label>Helger</label>
+                    </li>
+                </ul>
+                <p>Ålder på barnet/barnen:</p>
+                <ul class = "checkboxes">
+                    <li>
+                        <input type="checkbox" name="age_0_6">
+                        <label>0-6 år</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="age_7_12">
+                        <label>7-12 år</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" name="age_13_18">
+                        <label>13-18 år</label>
+                    </li>
+               </ul>
+                <button id="search-button">Sök</button>
+            </form>
+        </article>
+
         <article>
             <h1>Profiler</h1>
             <p>Här listas alla profiler. Du kan maila personen, gilla profilen eller skriva en kommentar.</p>
