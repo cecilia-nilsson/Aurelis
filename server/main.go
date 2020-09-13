@@ -29,7 +29,7 @@ type comment struct {
 	PostID  int       `json:"post_id"`
 	ID      int       `json:"id"`
 	Name    string    `json:"name"`
-	Date    time.Time `json:"date"`
+	Created time.Time `json:"created"`
 	Message string    `json:"message"`
 }
 
@@ -139,7 +139,7 @@ func listComments(PostID int) []comment {
 			&c.ID,
 			&c.Name,
 			&c.Message,
-			&c.Date,
+			&c.Created,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -163,9 +163,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	newPost.Likes = 0
 	newPost.Comments = []comment{}
 
-	// fmt.Println(newPost.Name)
-	// fmt.Println(newPost.VardagFM)
-	// fmt.Println(newPost.VardagEM)
 	_, err = db.Exec(`
 	INSERT INTO 
 		posts(title, name, email, image, message, created, likes, vardagfm, vardagem, vardagkvall, helg, age06, age712, age1318)
@@ -204,7 +201,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.Unmarshal(reqBody, &newComment)
-	newComment.Date = time.Now()
+	newComment.Created = time.Now()
 
 	_, err = db.Exec(`
 	INSERT INTO 
@@ -212,7 +209,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	VALUES($1, $2, $3, $4)`,
 		newComment.Name,
 		newComment.Message,
-		newComment.Date,
+		newComment.Created,
 		newComment.PostID,
 	)
 	if err != nil {
@@ -248,7 +245,6 @@ func likePost(w http.ResponseWriter, r *http.Request) {
 
 func makeSQLQuery(searchPost search) string {
 	var sqlQuery string
-	fmt.Println("Start: ", sqlQuery)
 
 	if searchPost.FreeText != "" {
 		sqlQuery = sqlQuery + `(
@@ -261,8 +257,6 @@ func makeSQLQuery(searchPost search) string {
 			message ILIKE '%' || $1 || '%'
 		)`
 	}
-
-	fmt.Println("Efter fritext: ", sqlQuery)
 
 	if searchPost.VardagFM || searchPost.VardagEM || searchPost.VardagKvall || searchPost.Helg {
 		var sqlTimeQuery string
@@ -299,8 +293,6 @@ func makeSQLQuery(searchPost search) string {
 		}
 	}
 
-	fmt.Println("Efter tider: ", sqlQuery)
-
 	if searchPost.Age06 || searchPost.Age712 || searchPost.Age1318 {
 		var sqlAgeQuery string
 
@@ -329,13 +321,13 @@ func makeSQLQuery(searchPost search) string {
 		}
 	}
 
-	fmt.Println("Efter ålder: ", sqlQuery)
-
 	if sqlQuery != "" {
-		sqlQuery = `SELECT * FROM posts WHERE ` + sqlQuery
+		sqlQuery = `SELECT * FROM posts WHERE ` + sqlQuery + `ORDER BY created DESC`
+	} else if sqlQuery == "" {
+		sqlQuery = `SELECT * FROM posts ORDER BY created DESC`
+	} else {
+		fmt.Println("Error in SQL query.")
 	}
-
-	fmt.Println("Returnerad sträng: ", sqlQuery)
 
 	return sqlQuery
 }
@@ -351,12 +343,20 @@ func searchPosts(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &searchPost)
 
 	sqlQuery := makeSQLQuery(searchPost)
-	fmt.Println("Mottagen sträng till searchPosts-funktionen: ", sqlQuery)
 
-	rows, err := db.Query(
-		sqlQuery,
-		searchPost.FreeText,
-	)
+	var rows *sql.Rows
+	// var err error
+
+	if searchPost.FreeText != "" {
+		rows, err = db.Query(
+			sqlQuery,
+			searchPost.FreeText,
+		)
+	} else {
+		rows, err = db.Query(
+			sqlQuery,
+		)
+	}
 
 	if err != nil {
 		fmt.Println(err)

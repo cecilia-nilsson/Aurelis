@@ -1,72 +1,77 @@
 <!doctype html>
 
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <title>Profiler</title>
-  <meta name="description" content="Profiler">
-  <meta name="author" content="Cecilia Nilsson">
+    <title>Profiler</title>
+    <meta name="description" content="Profiler">
+    <meta name="author" content="Cecilia Nilsson">
 
-  <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-    <a href="index.html">Startsida</a>
-    <a href="registration.html">Skapa din profil</a>
-    <!-- <a href="search.html">Sök bland profilerna</a> -->
+    <div class="topnav">
+        <a href="index.html">Startsida</a>
+        <a href="registration.html">Skapa din profil</a>
+        <a class="active" href="profiles.html">Sök bland profilerna</a>
+    </div>
+
     <main>
         <article>
             <h1>Sök bland profilerna</h1>
             <p>Fyll i formuläret för att söka bland profilerna.
-                Fyller du inte i något fällt får du upp alla existerande profiler.</p>
+                Fyller du inte i något fällt får du upp alla profiler.</p>
             <form id="search-form">
-                <ul>
+                <div>
                     <li>
                         <label>Fri text:</label>
                         <input type="text" id="free_text" name="free_text" class="inputarea">
                     </li>
-                </ul>
-                <p>Hjälp behövs främst:</p>
-                <ul class = "checkboxes">
-                    <li>
-                        <input type="checkbox" name="vardag_fm">
-                        <label>Vardagar förmiddag</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" name="vardag_em">
-                        <label>Vardagar eftermiddag</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" name="vardag_kvall">
-                        <label>Vardagar kväll</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" name="helg">
-                        <label>Helger</label>
-                    </li>
-                </ul>
-                <p>Ålder på barnet/barnen:</p>
-                <ul class = "checkboxes">
-                    <li>
-                        <input type="checkbox" name="age_0_6">
-                        <label>0-6 år</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" name="age_7_12">
-                        <label>7-12 år</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" name="age_13_18">
-                        <label>13-18 år</label>
-                    </li>
-               </ul>
+                </div>
+                <div><label>Hjälp behövs främst:</label>
+                    <ul class="checkboxes">
+                        <li>
+                            <input type="checkbox" name="vardag_fm">
+                            <label>Vardagar förmiddag</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" name="vardag_em">
+                            <label>Vardagar eftermiddag</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" name="vardag_kvall">
+                            <label>Vardagar kväll</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" name="helg">
+                            <label>Helger</label>
+                        </li>
+                    </ul>
+                </div>
+                <div><label>Ålder på barnet/barnen:</label>
+                    <ul class="checkboxes">
+                        <li>
+                            <input type="checkbox" name="age_0_6">
+                            <label>0-6 år</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" name="age_7_12">
+                            <label>7-12 år</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" name="age_13_18">
+                            <label>13-18 år</label>
+                        </li>
+                    </ul>
+                </div>
                 <button id="search-button">Sök</button>
             </form>
         </article>
 
         <article>
-            <h1>Profiler</h1>
-            <p>Här listas alla profiler. Du kan maila personen, gilla profilen eller skriva en kommentar.</p>
 
             <ul id="messages-list">
             </ul>
@@ -77,4 +82,5 @@
     <script src="js/moment.js"></script>
 
 </body>
+
 </html>
