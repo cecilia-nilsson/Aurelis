@@ -15,6 +15,7 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type config struct {
@@ -61,6 +62,12 @@ type search struct {
 	Age06       bool   `json:"age_0_6"`
 	Age712      bool   `json:"age_7_12"`
 	Age1318     bool   `json:"age_13_18"`
+}
+
+type user struct {
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 var db *sql.DB
@@ -219,6 +226,80 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newComment)
+}
+
+func updatePost(w http.ResponseWriter, r *http.Request) {
+	var updatePost post
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
+		return
+	}
+
+	json.Unmarshal(reqBody, &updatePost)
+
+	_, err = db.Exec(`
+	UPDATE
+		posts
+	SET
+		title = $1,
+		name = $2,
+		email = $3,
+		image = $4,
+		message = $5,
+		vardagfm = $6,
+		vardagem = $7,
+		vardagkvall = $8,
+		helg = $9,
+		age06 = $10,
+		age712 = $11,
+		age1318 = $12
+	WHERE
+		id=$13`,
+		updatePost.Title,
+		updatePost.Name,
+		updatePost.Email,
+		updatePost.Image,
+		updatePost.Message,
+		updatePost.VardagFM,
+		updatePost.VardagEM,
+		updatePost.VardagKvall,
+		updatePost.Helg,
+		updatePost.Age06,
+		updatePost.Age712,
+		updatePost.Age1318,
+		id,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// The following code row is just to give a response to the browser, to avoid complaint.
+	json.NewEncoder(w).Encode(map[string]int{"foo": 1, "bar": 2})
+}
+
+func deletePost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	_, err := db.Exec(`
+		DELETE FROM
+			posts
+		WHERE
+			id = $1
+	`, id)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// The following code row is just to give a response to the browser, to avoid complaint.
+	json.NewEncoder(w).Encode(map[string]int{"foo": 1, "bar": 2})
 }
 
 func likePost(w http.ResponseWriter, r *http.Request) {
@@ -397,6 +478,71 @@ func searchPosts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+func registerUser(w http.ResponseWriter, r *http.Request) {
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data with your username and password.")
+		return
+	}
+
+	var newUser user
+	json.Unmarshal(reqBody, &newUser)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.MinCost)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec(`
+	INSERT INTO
+		users(email, password)
+	VALUES
+		($1, $2)`,
+		newUser.Email,
+		hashedPassword,
+	)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func loginUser(w http.ResponseWriter, r *http.Request) {
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter your email and password.")
+		return
+	}
+
+	var existingUser user
+
+	json.Unmarshal(reqBody, &existingUser)
+
+	row := db.QueryRow(`
+		SELECT
+			password
+		FROM
+			users
+		WHERE
+			email LIKE $1`,
+		existingUser.Email,
+	)
+
+	var hashedPassword string
+	err = row.Scan(&hashedPassword)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(existingUser.Password))
+	if err != nil {
+		fmt.Println("Problem logging in.")
+		return
+	}
+
+	fmt.Println("Password matches.")
+}
+
 func main() {
 	// Open config file
 	configFile, errConfigFile := os.Open("config.json")
@@ -433,9 +579,13 @@ func main() {
 	router.HandleFunc("/comments", createComment).Methods("POST")
 	router.HandleFunc("/posts/{id:[0-9]+}/like", likePost).Methods("POST")
 	router.HandleFunc("/searchPosts", searchPosts).Methods("POST")
+	router.HandleFunc("/posts/{id:[0-9]+}", deletePost).Methods("DELETE")
+	// router.HandleFunc("/posts/{id:[0-9]+}/update", updatePost).Methods("POST")
+	router.HandleFunc("/login", loginUser).Methods("POST")
+	router.HandleFunc("/registerUser", registerUser).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
-		handlers.AllowedMethods([]string{"POST", "GET"}),
+		handlers.AllowedMethods([]string{"POST", "GET", "DELETE"}),
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"}))(router)))
 }

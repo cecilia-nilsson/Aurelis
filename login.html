@@ -1,0 +1,65 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Login</title>
+    <meta name="description" content="Logga in">
+    <meta name="author" content="Cecilia Nilsson">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="topnav">
+        <a href="index.html">Startsida</a>
+        <a href="registration.html">Skapa din profil</a>
+        <a href="profiles.html">Sök bland profilerna</a>
+        <a class="active" href="login.html">Skapa konto/logga in</a>
+    </div>
+
+    <main>
+        <article>
+            <h1>Skapa konto</h1>
+            <div id="register_user">
+                <form id="account-form">
+                    <p>Fyll i formuläret för att skapa ett konto.</p>
+                    <div>
+                        <div class="email-field">
+                            <label>E-postadress:</label>
+                            <input type="email" id="email" name="email" class="inputarea" required>
+                        </div>
+                        <div class="password-field">
+                            <label>Lösenord:</label>
+                            <input type="text" id="password" name="password" class="inputarea" required>
+                        </div>
+                        <button id="account-button">Skapa konto</button>
+                </form>
+            </div>
+            <h1>Logga in</h1>
+            <div id="login">
+                <form id="login-form">
+                    <p>Logga in:</p>
+                    <div>
+                        <div class="email-field">
+                            <label>E-postadress:</label>
+                            <input type="email" id="email" name="email" class="inputarea" required>
+                        </div>
+                        <div class="password-field">
+                            <label>Lösenord:</label>
+                            <input type="text" id="password" name="password" class="inputarea" required>
+                        </div>
+                        <button id="login-button">Logga in</button>
+                </form>
+            </div>
+        </article>
+    </main>
+    <script src="js/script_login.js"></script>
+    <script src="js/server.js"></script>
+
+</body>
+
+</html>

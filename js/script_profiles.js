@@ -33,6 +33,7 @@ const templateFn = message => `
         ${message['name']}</a>.
     </p>
     <p class="show-comments-list link" data-id="${message.id}">Visa alla kommentarer</p>
+    <button class="delete-post" data-id="${message.id}">Radera profilen</button>
     <div class="hide" id="comments-list${message.id}" data-id="${message.id}">
         <p>${message['comment'].map(comment => `
             <p class="comment-text-output">${comment.message}</p>
@@ -60,6 +61,73 @@ const templateFn = message => `
 </li>
 </div>`
 
+{/* <button class="update-post" data-id="${message.id}">Uppdatera profilen</button> */ }
+
+// const updateFn = message => `
+// <h1>Uppdatera profilen</h1>
+// <div id="update-profile">
+//     <form id="update-message-form">
+//         <div>
+//             <label>Titel:</label>
+//             <input type="text" id="title" name="title" class="inputarea" value=${message['title']} maxlength="40" required>
+//         </div>
+//         <div>
+//             <label>Namn:</label>
+//             <input type="text" id="name" name="name" class="inputarea" value=${message['name']} maxlength="40" required>
+//         </div>
+//         <div class="email-field">
+//             <label>E-postadress:</label>
+//             <input type="email" id="email" name="email" class="inputarea" value=${message['email']} required>
+//         </div>
+//         <div>
+//             <label>Bild:</label>
+//             <input type=text name="image" class="inputarea" value=${message['image']}></input>
+//         </div>
+//         <div>
+//             <label>Meddelande:</label>
+//             <textarea name="message" class="inputarea" value=${message['message']}></textarea>
+//         </div>
+//         <div><label>Hjälp behövs främst:</label>
+//             <ul class="checkboxes">
+//                 <li>
+//                     <input type="checkbox" name="vardag_fm" value=${message['vardag_fm']}>
+//                     <label>Vardagar förmiddag</label>
+//                 </li>
+//                 <li>
+//                     <input type="checkbox" name="vardag_em" value=${message['vardag_em']}>
+//                     <label>Vardagar eftermiddag</label>
+//                 </li>
+//                 <li>
+//                     <input type="checkbox" name="vardag_kvall" value=${message['vardag_kvall']}>
+//                     <label>Vardagar kväll</label>
+//                 </li>
+//                 <li>
+//                     <input type="checkbox" name="helg" value=${message['helg']}>
+//                     <label>Helger</label>
+//                 </li>
+//             </ul>
+//         </div>
+//         <div><label>Ålder på barnet/barnen:</label>
+//             <ul class="checkboxes">
+//                 <li>
+//                     <input type="checkbox" name="age_0_6" value=${message['age_0_6']}>
+//                     <label>0-6 år</label>
+//                 </li>
+//                 <li>
+//                     <input type="checkbox" name="age_7_12" value=${message['age_7_12']}>
+//                     <label>7-12 år</label>
+//                 </li>
+//                 <li>
+//                     <input type="checkbox" name="age_13_18" value=${message['age_13_18']}>
+//                     <label>13-18 år</label>
+//                 </li>
+//             </ul>
+//         </div>
+//         <button id="update-profile-button">Spara ändringarna</button>
+//     </form>
+// </div>
+// `
+
 const render = messages => {
     // messages.forEach(message => { console.log(message.image) })
     if (messages.length === 0) {
@@ -83,6 +151,35 @@ const render = messages => {
             })
         }
     }
+
+    for (let button of document.querySelectorAll('.message .delete-post')) {
+        button.onclick = () => {
+            server.deletePost(button.dataset.id).then(() => {
+                server.listMessages().then(render)
+            })
+        }
+    }
+
+    // for (let button of document.querySelectorAll('.message .update-post')) {
+    //     button.onclick = () => {
+    //         message = server.getMessage(button.dataset.id)
+    //         console.log("id: ", button.dataset.id)
+    //         console.log(message)
+    //         const elem = document.getElementById('search-form')
+    //         const html = updateFn(message)
+    //         elem.innerHTML = html
+    //     }
+    // }
+
+    // for (let button of document.querySelectorAll('.message .update-profile-button')) {
+    //     button.onclick = () => {
+    //         const FD = new FormData(document.getElementById('update-message-form'))
+    //         const message = Object.fromEntries(FD)
+    //         server.updatePost(message, button.dataset.id).then(() => {
+    //             server.listMessages().then(render)
+    //         })
+    //     }
+    // }
 
     for (let button of document.querySelectorAll('.message .submit-comment')) {
         button.onclick = (e) => {
